@@ -13,7 +13,7 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "internalConsole",
-            "args" : ["-o", "./.output/input01.md", "./.input/input01.csv"],
+            "args" : ["-o", "./.output/input01.md", "--csplit", "2", "./.input/input01.csv"],
             "preLaunchTask": "build",
             "internalConsoleOptions": "openOnSessionStart"
         }
