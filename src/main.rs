@@ -42,10 +42,25 @@ fn to_md_table_simple(records: &[csv::StringRecord]) -> Vec<String> {
 
 fn to_md_tables_csplit(
     records: &[csv::StringRecord],
-    ncols: usize,
-    csplit: usize,
+    guides: &CsplitGuides
 ) -> Vec<Vec<String>> {
-    todo!()
+    (0..guides.div)
+        .map(|isplit| {
+            records
+                .iter()
+                .map(move |record| {
+                    let col_from = isplit * guides.csplit;
+                    let col_to = (isplit + 1) * guides.csplit;
+                    (col_from..col_to)
+                        .map(|icol| {
+                            let range = record.range(icol).expect("Valid index");
+                            String::from(&record.as_slice()[range])
+                        })
+                        .join("|")
+                })
+                .collect::<Vec<String>>()
+        })
+        .collect()
 }
 
 fn main() -> Result<()> {
@@ -63,9 +78,10 @@ fn main() -> Result<()> {
         .records()
         .collect::<csv::Result<Vec<csv::StringRecord>>>()?;
 
-    // for line in to_md_table_simple(&records) {
-    //     println!("{line}");
-    // }
+    let tables = to_md_tables_csplit(&records, &guides);
+    for line in tables[0].iter() {
+        println!("{line}");
+    }
 
     Ok(())
 }
