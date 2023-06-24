@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use itertools::Itertools;
+use std::fmt::Display;
 
 #[derive(Debug)]
 struct Guides {
@@ -33,11 +33,10 @@ where
 }
 
 fn build_hline(rec: &csv::StringRecord, col_from: usize, col_to: usize) -> String {
-    let to_join = (col_from..col_to)
-        .map(|icol| {
-            let range = rec.range(icol).expect("Valid index");
-            "-".repeat(range.len().max(1))
-        });
+    let to_join = (col_from..col_to).map(|icol| {
+        let range = rec.range(icol).expect("Valid index");
+        "-".repeat(range.len().max(1))
+    });
     join_with_bars(to_join)
 }
 
@@ -49,6 +48,25 @@ fn record_columns_to_md(rec: &csv::StringRecord, col_from: usize, col_to: usize)
     join_with_bars(to_join)
 }
 
+fn table_columns_to_md(
+    headers: &csv::StringRecord,
+    records: &[csv::StringRecord],
+    col_from: usize,
+    col_to: usize,
+) -> Vec<String> {
+    let mut this_table = vec![
+        record_columns_to_md(headers, col_from, col_to),
+        build_hline(headers, col_from, col_to),
+    ];
+
+    this_table.extend(
+        records
+            .iter()
+            .map(|rec| record_columns_to_md(rec, col_from, col_to)),
+    );
+    this_table
+}
+
 pub fn to_md_tables_csplit(
     headers: &csv::StringRecord,
     records: &[csv::StringRecord],
@@ -56,19 +74,20 @@ pub fn to_md_tables_csplit(
 ) -> Vec<Vec<String>> {
     let ncols = headers.len();
     let guides = Guides::new(ncols, csplit);
-    (0..guides.div)
+    let mut tables = (0..guides.div)
         .map(|isplit| {
             let col_from = isplit * guides.csplit;
             let col_to = (isplit + 1) * guides.csplit;
-            let mut this_table = vec![
-                record_columns_to_md(headers, col_from, col_to),
-                build_hline(headers, col_from, col_to)];
-
-            this_table.extend(records
-                .iter()
-                .map(|rec| record_columns_to_md(rec, col_from, col_to))
-            );
-            this_table
+            table_columns_to_md(headers, records, col_from, col_to)
         })
-        .collect()
+        .collect::<Vec<Vec<String>>>();
+    if guides.div != guides.div_ceil {
+        tables.push(table_columns_to_md(
+            headers,
+            records,
+            guides.div * guides.csplit,
+            guides.div * guides.csplit + guides.rem,
+        ));
+    }
+    tables
 }

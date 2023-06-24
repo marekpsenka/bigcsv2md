@@ -35,8 +35,11 @@ fn main() -> Result<()> {
         .collect::<csv::Result<Vec<csv::StringRecord>>>()?;
 
     let tables = to_md_tables_csplit(&headers, &records, csplit);
-    for line in tables[0].iter() {
-        println!("{line}");
+    for table in tables {
+        for line in table {
+            println!("{line}");
+        }
+        println!();
     }
 
     Ok(())
