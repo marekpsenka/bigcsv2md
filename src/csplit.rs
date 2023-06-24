@@ -3,7 +3,7 @@ use std::fmt::Display;
 
 #[derive(Debug)]
 struct Guides {
-    ncols: usize,
+    coffset: usize,
     csplit: usize,
     div: usize,
     div_ceil: usize,
@@ -11,13 +11,24 @@ struct Guides {
 }
 
 impl Guides {
-    fn new(ncols: usize, csplit: usize) -> Guides {
-        Guides {
-            ncols,
-            csplit,
-            div: ncols / csplit,
-            div_ceil: (ncols + csplit - 1) / csplit,
-            rem: ncols % csplit,
+    fn new(ncols: usize, csplit: usize, rheaders: bool) -> Guides {
+        if rheaders {
+            Guides {
+                coffset: 1,
+                csplit,
+                div: (ncols - 1) / csplit,
+                div_ceil: (ncols + csplit - 2) / csplit,
+                rem: (ncols - 1) % csplit
+            }
+        }
+        else {
+            Guides {
+                coffset: 0,
+                csplit,
+                div: ncols / csplit,
+                div_ceil: (ncols + csplit - 1) / csplit,
+                rem: ncols % csplit
+            }
         }
     }
 }
@@ -40,11 +51,13 @@ fn build_hline(rec: &csv::StringRecord, col_from: usize, col_to: usize) -> Strin
     join_with_bars(to_join)
 }
 
+fn record_column_to_str(rec: &csv::StringRecord, icol: usize) -> &str {
+    let range = rec.range(icol).expect("Valid Index");
+    &rec.as_slice()[range]
+}
+
 fn record_columns_to_md(rec: &csv::StringRecord, col_from: usize, col_to: usize) -> String {
-    let to_join = (col_from..col_to).map(|icol| {
-        let range = rec.range(icol).expect("Valid index");
-        &rec.as_slice()[range]
-    });
+    let to_join = (col_from..col_to).map(|icol| record_column_to_str(rec, icol));
     join_with_bars(to_join)
 }
 
@@ -53,6 +66,7 @@ fn table_columns_to_md(
     records: &[csv::StringRecord],
     col_from: usize,
     col_to: usize,
+    maybe_rheaders: Option<&[&str]>
 ) -> Vec<String> {
     let mut this_table = vec![
         record_columns_to_md(headers, col_from, col_to),
@@ -64,6 +78,16 @@ fn table_columns_to_md(
             .iter()
             .map(|rec| record_columns_to_md(rec, col_from, col_to)),
     );
+
+    if let Some(rheaders) = maybe_rheaders {
+        this_table
+            .iter_mut()
+            .zip(rheaders.iter())
+            .for_each(|(s, &rh)| {
+                s.insert_str(0, rh);
+            })
+    }
+
     this_table
 }
 
@@ -71,22 +95,32 @@ pub fn to_md_tables_csplit(
     headers: &csv::StringRecord,
     records: &[csv::StringRecord],
     csplit: usize,
+    rheaders: bool
 ) -> Vec<Vec<String>> {
     let ncols = headers.len();
-    let guides = Guides::new(ncols, csplit);
+    let guides = Guides::new(ncols, csplit, rheaders);
+
+    let maybe_rheaders = if rheaders {
+        let mut rheaders = vec!["||", "|-|"]; // TODO: Not ideal
+        rheaders.extend(records.iter().map(|rec| record_column_to_str(rec, 0)));
+        Some(rheaders)
+    }
+    else { None };
+
     let mut tables = (0..guides.div)
         .map(|isplit| {
-            let col_from = isplit * guides.csplit;
-            let col_to = (isplit + 1) * guides.csplit;
-            table_columns_to_md(headers, records, col_from, col_to)
+            let col_from = guides.coffset + isplit * guides.csplit;
+            let col_to = guides.coffset + (isplit + 1) * guides.csplit;
+            table_columns_to_md(headers, records, col_from, col_to, maybe_rheaders.as_deref())
         })
         .collect::<Vec<Vec<String>>>();
     if guides.div != guides.div_ceil {
         tables.push(table_columns_to_md(
             headers,
             records,
-            guides.div * guides.csplit,
-            guides.div * guides.csplit + guides.rem,
+            guides.coffset + guides.div * guides.csplit,
+            guides.coffset + guides.div * guides.csplit + guides.rem,
+            maybe_rheaders.as_deref()
         ));
     }
     tables

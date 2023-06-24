@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "debug",
+            "name": "csplit",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/debug/bigcsv2md.exe",
@@ -14,6 +14,19 @@
             "environment": [],
             "console": "internalConsole",
             "args" : ["-o", "./.output/input01.md", "--csplit", "2", "./.input/input01.csv"],
+            "preLaunchTask": "build",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "csplit_rheaders",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/bigcsv2md.exe",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "internalConsole",
+            "args" : ["-o", "./.output/input01.md", "--csplit", "2", "--rheaders", "./.input/input01.csv"],
             "preLaunchTask": "build",
             "internalConsoleOptions": "openOnSessionStart"
         }

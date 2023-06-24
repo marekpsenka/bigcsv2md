@@ -12,6 +12,8 @@ struct Args {
     output: String,
     #[arg(long = "csplit")]
     csplit: Option<usize>,
+    #[arg(long = "rheaders")]
+    rheaders: bool,
     input: String,
 }
 
@@ -34,7 +36,7 @@ fn main() -> Result<()> {
         .records()
         .collect::<csv::Result<Vec<csv::StringRecord>>>()?;
 
-    let tables = to_md_tables_csplit(&headers, &records, csplit);
+    let tables = to_md_tables_csplit(&headers, &records, csplit, args.rheaders);
     for table in tables {
         for line in table {
             println!("{line}");
