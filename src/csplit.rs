@@ -1,5 +1,4 @@
-use itertools::Itertools;
-use std::fmt::Display;
+use crate::{build_hline, join_with_bars};
 
 #[derive(Debug)]
 struct Guides {
@@ -33,23 +32,7 @@ impl Guides {
     }
 }
 
-fn join_with_bars<T>(mut iter: impl Iterator<Item = T>) -> String
-where
-    T: Display,
-{
-    let mut joined = iter.join("|");
-    joined.insert(0, '|');
-    joined.insert(joined.len(), '|');
-    joined
-}
 
-fn build_hline(rec: &csv::StringRecord, col_from: usize, col_to: usize) -> String {
-    let to_join = (col_from..col_to).map(|icol| {
-        let range = rec.range(icol).expect("Valid index");
-        "-".repeat(range.len().max(1))
-    });
-    join_with_bars(to_join)
-}
 
 fn record_column_to_str(rec: &csv::StringRecord, icol: usize) -> &str {
     let range = rec.range(icol).expect("Valid Index");

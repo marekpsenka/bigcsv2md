@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "csplit",
+            "name": "input01 - Simple",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/debug/bigcsv2md.exe",
@@ -13,12 +13,12 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "internalConsole",
-            "args" : ["-o", "./.output/input01.md", "--csplit", "2", "./.input/input01.csv"],
+            "args" : ["-o", "./.output/input01.md", "./.input/input01.csv"],
             "preLaunchTask": "build",
             "internalConsoleOptions": "openOnSessionStart"
         },
         {
-            "name": "csplit_rheaders",
+            "name": "input01 - csplit_rheaders",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/debug/bigcsv2md.exe",
@@ -31,7 +31,7 @@
             "internalConsoleOptions": "openOnSessionStart"
         },
         {
-            "name": "input02",
+            "name": "input02 - csplit_rheaders",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/debug/bigcsv2md.exe",
