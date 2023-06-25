@@ -66,7 +66,7 @@ fn table_columns_to_md(
     records: &[csv::StringRecord],
     col_from: usize,
     col_to: usize,
-    maybe_rheaders: Option<&[&str]>
+    maybe_rheaders: Option<&[String]>
 ) -> Vec<String> {
     let mut this_table = vec![
         record_columns_to_md(headers, col_from, col_to),
@@ -83,8 +83,8 @@ fn table_columns_to_md(
         this_table
             .iter_mut()
             .zip(rheaders.iter())
-            .for_each(|(s, &rh)| {
-                s.insert_str(0, rh);
+            .for_each(|(s, rh)| {
+                s.insert_str(0, rh.as_str());
             })
     }
 
@@ -101,8 +101,12 @@ pub fn to_md_tables_csplit(
     let guides = Guides::new(ncols, csplit, rheaders);
 
     let maybe_rheaders = if rheaders {
-        let mut rheaders = vec!["||", "|-|"]; // TODO: Not ideal
-        rheaders.extend(records.iter().map(|rec| record_column_to_str(rec, 0)));
+        let mut rheaders = vec!["| ".to_owned(), "|-".to_owned()]; // TODO: Not ideal
+        rheaders.extend(records.iter().map(|rec| {
+            let mut col = record_column_to_str(rec, 0).to_owned();
+            col.insert(0, '|');
+            col
+        }));
         Some(rheaders)
     }
     else { None };

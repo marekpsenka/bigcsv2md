@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use anyhow::{anyhow, Result};
 use clap::Parser;
 use csplit::to_md_tables_csplit;
@@ -37,11 +39,14 @@ fn main() -> Result<()> {
         .collect::<csv::Result<Vec<csv::StringRecord>>>()?;
 
     let tables = to_md_tables_csplit(&headers, &records, csplit, args.rheaders);
+    let output = std::fs::File::create(args.output)?;
+    let mut writer = std::io::LineWriter::new(output);
     for table in tables {
         for line in table {
-            println!("{line}");
+            writer.write_all(line.as_bytes())?;
+            writer.write_all(b"\n")?
         }
-        println!();
+        writer.write_all(b"\n")?
     }
 
     Ok(())
