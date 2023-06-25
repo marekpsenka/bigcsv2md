@@ -32,8 +32,6 @@ impl Guides {
     }
 }
 
-
-
 fn record_column_to_str(rec: &csv::StringRecord, icol: usize) -> &str {
     let range = rec.range(icol).expect("Valid Index");
     &rec.as_slice()[range]
