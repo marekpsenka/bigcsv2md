@@ -9,12 +9,16 @@ mod csplit;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
+    /// Output file path
     #[arg(short = 'o')]
     output: String,
+    /// Form multiple tables by splitting after <csplit> columns
     #[arg(long = "csplit")]
     csplit: Option<usize>,
+    /// Distribute first column to split tables as row headers
     #[arg(long = "rheaders")]
     rheaders: bool,
+    /// Input file path
     input: String,
 }
 
