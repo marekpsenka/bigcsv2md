@@ -1,4 +1,4 @@
-use crate::{build_hline, join_with_bars};
+use crate::common::{build_hline, join_with_bars};
 
 #[derive(Debug)]
 struct Guides {
