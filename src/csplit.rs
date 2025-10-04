@@ -17,16 +17,15 @@ impl Guides {
                 csplit,
                 div: (ncols - 1) / csplit,
                 div_ceil: (ncols + csplit - 2) / csplit,
-                rem: (ncols - 1) % csplit
+                rem: (ncols - 1) % csplit,
             }
-        }
-        else {
+        } else {
             Guides {
                 coffset: 0,
                 csplit,
                 div: ncols / csplit,
                 div_ceil: (ncols + csplit - 1) / csplit,
-                rem: ncols % csplit
+                rem: ncols % csplit,
             }
         }
     }
@@ -47,7 +46,7 @@ fn table_columns_to_md(
     records: &[csv::StringRecord],
     col_from: usize,
     col_to: usize,
-    maybe_rheaders: Option<&[String]>
+    maybe_rheaders: Option<&[String]>,
 ) -> Vec<String> {
     let mut this_table = vec![
         record_columns_to_md(headers, col_from, col_to),
@@ -76,7 +75,7 @@ pub fn to_md_tables_csplit(
     headers: &csv::StringRecord,
     records: &[csv::StringRecord],
     csplit: usize,
-    rheaders: bool
+    rheaders: bool,
 ) -> Vec<Vec<String>> {
     let ncols = headers.len();
     let guides = Guides::new(ncols, csplit, rheaders);
@@ -89,14 +88,21 @@ pub fn to_md_tables_csplit(
             col
         }));
         Some(rheaders)
-    }
-    else { None };
+    } else {
+        None
+    };
 
     let mut tables = (0..guides.div)
         .map(|isplit| {
             let col_from = guides.coffset + isplit * guides.csplit;
             let col_to = guides.coffset + (isplit + 1) * guides.csplit;
-            table_columns_to_md(headers, records, col_from, col_to, maybe_rheaders.as_deref())
+            table_columns_to_md(
+                headers,
+                records,
+                col_from,
+                col_to,
+                maybe_rheaders.as_deref(),
+            )
         })
         .collect::<Vec<Vec<String>>>();
     if guides.div != guides.div_ceil {
@@ -105,7 +111,7 @@ pub fn to_md_tables_csplit(
             records,
             guides.coffset + guides.div * guides.csplit,
             guides.coffset + guides.div * guides.csplit + guides.rem,
-            maybe_rheaders.as_deref()
+            maybe_rheaders.as_deref(),
         ));
     }
     tables

@@ -1,8 +1,9 @@
 use anyhow::Result;
+use bigcsv2md::common::read_headers_records;
+use bigcsv2md::csplit::to_md_tables_csplit;
+use bigcsv2md::simple::to_md_table_simple;
 use clap::Parser;
 use std::io::Write;
-use bigcsv2md::simple::to_md_table_simple;
-use bigcsv2md::csplit::to_md_tables_csplit;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -22,13 +23,9 @@ struct Args {
 
 fn main() -> Result<()> {
     let args = Args::parse();
-    let mut reader = csv::Reader::from_path(args.input)?;
+    let input_file = std::fs::File::open(args.input)?;
 
-    let headers = reader.headers()?.clone();
-
-    let records = reader
-        .records()
-        .collect::<csv::Result<Vec<csv::StringRecord>>>()?;
+    let (headers, records) = read_headers_records(input_file)?;
 
     let output = std::fs::File::create(args.output)?;
     let mut writer = std::io::LineWriter::new(output);
