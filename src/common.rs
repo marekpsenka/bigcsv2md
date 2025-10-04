@@ -1,5 +1,6 @@
-use std::fmt::Display;
+use std::{fmt::Display, io::Read};
 use itertools::Itertools;
+use anyhow::{Context, Result};
 
 pub fn join_with_bars<T>(mut iter: impl Iterator<Item = T>) -> String
 where
@@ -17,4 +18,16 @@ pub fn build_hline(rec: &csv::StringRecord, col_from: usize, col_to: usize) -> S
         "-".repeat(range.len().max(1))
     });
     join_with_bars(to_join)
+}
+
+pub fn read_headers_records(reader: impl Read) -> Result<(csv::StringRecord, Vec<csv::StringRecord>)> {
+    let mut reader = csv::Reader::from_reader(reader);
+
+    let headers = reader.headers().context("Could not read headers")?.clone();
+
+    let records = reader
+        .records()
+        .collect::<csv::Result<Vec<csv::StringRecord>>>().context("Could not read records")?;
+
+    Ok((headers, records))
 }
