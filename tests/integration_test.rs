@@ -1,16 +1,19 @@
+mod common {
+    pub static LIPSUM_CSV: &str = include_str!("data/lipsum.csv");
+}
+
 #[test]
 fn test_lipsum_simple() {
     use bigcsv2md::common::read_headers_records;
     use bigcsv2md::simple::to_md_table_simple;
-    let input = include_str!("data/lipsum.csv");
+    use common::LIPSUM_CSV;
 
-    let (headers, records) = read_headers_records(input.as_bytes()).expect("Read successful");
+    let (headers, records) = read_headers_records(LIPSUM_CSV.as_bytes()).expect("Read successful");
     let mut result_iter = to_md_table_simple(&headers, &records).into_iter();
 
     let output = include_str!("data/lipsum.md");
-    let mut output_lines = output.lines();
 
-    while let Some(line) = output_lines.next() {
+    for line in output.lines() {
         let result_line = result_iter.next();
         assert!(result_line.is_some());
 

@@ -24,7 +24,7 @@ impl Guides {
                 coffset: 0,
                 csplit,
                 div: ncols / csplit,
-                div_ceil: (ncols + csplit - 1) / csplit,
+                div_ceil: ncols.div_ceil(csplit),
                 rem: ncols % csplit,
             }
         }

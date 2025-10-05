@@ -32,12 +32,15 @@ fn main() -> Result<()> {
 
     if let Some(csplit) = args.csplit {
         let tables = to_md_tables_csplit(&headers, &records, csplit, args.rheaders);
-        for table in tables {
-            for line in table {
+        for i in 0..tables.len() {
+            for line in &tables[i] {
                 writer.write_all(line.as_bytes())?;
                 writer.write_all(b"\n")?
             }
-            writer.write_all(b"\n")?
+
+            if i != tables.len() - 1 {
+                writer.write_all(b"\n")?
+            }
         }
     } else {
         let table = to_md_table_simple(&headers, &records);
